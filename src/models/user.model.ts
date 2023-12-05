@@ -1,4 +1,6 @@
 import { Schema, Model, model, Document } from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 interface IUser extends Document {
   fullName: string;
@@ -43,5 +45,51 @@ const userSchema = new Schema<IUser>(
   },
   { timestamps: true }
 );
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    return next();
+  }
+
+  this.password = await bcrypt.hash(this.password, 8);
+});
+
+userSchema.methods.generateAccessToken = function (): string {
+  const accessToken = jwt.sign(
+    {
+      _id: this._id,
+      fullName: this.fullName,
+      email: this.email,
+      avatar: this.avatar,
+    },
+    process.env.ACCESS_TOKEN_SECRET as string,
+    { expiresIn: "1d" }
+  );
+
+  return accessToken;
+};
+
+userSchema.methods.generateRefreshToken = function (): string {
+  const refreshToken = jwt.sign(
+    {
+      _id: this._id,
+      fullName: this.fullName,
+      email: this.email,
+      avatar: this.avatar,
+    },
+    process.env.REFRESH_TOKEN_SECRET as string,
+    { expiresIn: "10d" }
+  );
+
+  return refreshToken;
+};
+
+userSchema.methods.comparePassword = async function (
+  password: string
+): Promise<boolean> {
+  const isValidPassword = await bcrypt.compare(password, this.password);
+
+  return isValidPassword;
+};
 
 export const User: Model<IUser> = model("User", userSchema);
