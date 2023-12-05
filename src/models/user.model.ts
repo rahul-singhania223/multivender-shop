@@ -10,6 +10,8 @@ interface IUser extends Document {
   avatar: string;
   type: "ADMIN" | "CUSTOMER" | "VENDOR";
   refreshToken: string;
+  generateAccessToken: () => string;
+  generateRefreshToken: () => string;
 }
 
 const userSchema = new Schema<IUser>(
@@ -33,7 +35,6 @@ const userSchema = new Schema<IUser>(
     },
     avatar: {
       type: String,
-      required: [true, "avatar is required"],
     },
     type: {
       type: String,

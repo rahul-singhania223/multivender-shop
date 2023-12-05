@@ -6,3 +6,5 @@ const asyncHandler =
     Promise.resolve(asyncFn(req, res, next)).catch((err: any) => {
       next(new ApiError(err.message, 500));
     });
+
+export { asyncHandler };
