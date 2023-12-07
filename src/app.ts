@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import ApiError from "./utils/ApiError";
+import handleApiError from "./middlewares/handleApiError";
 
 const app = express();
 
@@ -17,10 +18,17 @@ app.use(
 );
 
 // ROUTES
+import userRouter from "./routes/user.route";
+import categoryRouter from "./routes/category.route";
+
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/categories", categoryRouter);
 
 // handle unknown routes
 app.get("*", (req, res, next) => {
   next(new ApiError("Unknown route", 404));
 });
+
+app.use(handleApiError);
 
 export { app };

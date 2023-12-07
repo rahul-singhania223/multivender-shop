@@ -10,9 +10,7 @@ interface IColor {
 interface IProduct {
   title: string;
   description: string;
-
   discount: number; // number in precentage
-
   colors: [IColor];
   category: Schema.Types.ObjectId;
   sub_category: Schema.Types.ObjectId;

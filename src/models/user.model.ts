@@ -1,17 +1,18 @@
 import { Schema, Model, model, Document } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-interface IUser extends Document {
+export interface IUser extends Document {
   fullName: string;
   email: string;
-  password: string;
+  password?: string;
   phone: string;
   avatar: string;
   type: "ADMIN" | "CUSTOMER" | "VENDOR";
-  refreshToken: string;
   generateAccessToken: () => string;
   generateRefreshToken: () => string;
+  comparePassword: (password: string) => boolean;
 }
 
 const userSchema = new Schema<IUser>(
@@ -28,6 +29,7 @@ const userSchema = new Schema<IUser>(
     password: {
       type: String,
       required: [true, "password is required"],
+      select: false,
     },
     phone: {
       type: String,
@@ -38,21 +40,22 @@ const userSchema = new Schema<IUser>(
     },
     type: {
       type: String,
-      default: "CUSTOMER",
-    },
-    refreshToken: {
-      type: String,
+      required: true,
     },
   },
   { timestamps: true }
 );
+
+userSchema.plugin(mongooseAggregatePaginate);
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
   }
 
-  this.password = await bcrypt.hash(this.password, 8);
+  if (this.password) {
+    this.password = await bcrypt.hash(this.password, 8);
+  }
 });
 
 userSchema.methods.generateAccessToken = function (): string {
@@ -64,7 +67,7 @@ userSchema.methods.generateAccessToken = function (): string {
       avatar: this.avatar,
     },
     process.env.ACCESS_TOKEN_SECRET as string,
-    { expiresIn: "1d" }
+    { expiresIn: "15m" }
   );
 
   return accessToken;

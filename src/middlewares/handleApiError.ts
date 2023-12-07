@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, Errback } from "express";
 
 const handleApiError = (
   error: any,
@@ -16,4 +16,4 @@ const handleApiError = (
   });
 };
 
-export { handleApiError };
+export default handleApiError;
