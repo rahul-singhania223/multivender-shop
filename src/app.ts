@@ -20,9 +20,16 @@ app.use(
 // ROUTES
 import userRouter from "./routes/user.route";
 import categoryRouter from "./routes/category.route";
+import { authorizeUser } from "./middlewares/authorizeUser";
+import { authorizeRole } from "./middlewares/authorizeRole";
 
 app.use("/api/v1/user", userRouter);
-app.use("/api/v1/categories", categoryRouter);
+app.use(
+  "/api/v1/categories",
+  authorizeUser,
+  authorizeRole("ADMIN"),
+  categoryRouter
+);
 
 // handle unknown routes
 app.get("*", (req, res, next) => {
