@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createSubCategories,
+  deleteSubCategories,
   getAllSubCategories,
 } from "../controllers/subCategory.controller";
 import { authorizeRole } from "../middlewares/authorizeRole";
@@ -14,6 +15,14 @@ router.post(
   authorizeUser,
   authorizeRole("ADMIN"),
   createSubCategories
+);
+
+// DELETE SUB CATEGORIES
+router.delete(
+  "/delete",
+  authorizeUser,
+  authorizeRole("ADMIN"),
+  deleteSubCategories
 );
 
 // GET ALL SUB CATEGORIES
