@@ -1,8 +1,8 @@
-import { Document, Schema, Model, model } from "mongoose";
+import { Document, Schema, Model, model, Types } from "mongoose";
 
-interface ISubCategory extends Document {
+export interface ISubCategory extends Document {
   name: string;
-  category: Schema.Types.ObjectId;
+  category: Types.ObjectId;
 }
 
 const subCategorySchema = new Schema<ISubCategory>(
