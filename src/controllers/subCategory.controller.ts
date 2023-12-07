@@ -61,3 +61,27 @@ const createSubCategories = asyncHandler(
       );
   }
 );
+
+// GET ALL SUB CATEGORIES
+const getAllSubCategories = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const cacheSubCategories = JSON.parse(
+      (await redis.get("sub_categories")) as string
+    );
+
+    if (cacheSubCategories) {
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(
+            true,
+            200,
+            "Got the list of sub categories",
+            cacheSubCategories
+          )
+        );
+    }
+  }
+);
+
+export { createSubCategories, getAllSubCategories };
