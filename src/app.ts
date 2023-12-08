@@ -7,6 +7,7 @@ import { authorizeUser } from "./middlewares/authorizeUser.middleware";
 import { authorizeRole } from "./middlewares/authorizeRole.middleware";
 import { upload } from "./middlewares/multer.middleware";
 import path from "path";
+import { Field } from "multer";
 
 const app = express();
 
@@ -25,16 +26,14 @@ app.use(
 import userRouter from "./routes/user.route";
 import categoryRouter from "./routes/category.route";
 import subCategoryRouter from "./routes/subCategory.route";
+import multer from "multer";
+import { uploadOnCloudinary } from "./utils/cloudinary";
 
 app.use("/api/v1/user", userRouter);
 
 app.use("/api/v1/categories", categoryRouter);
 
 app.use("/api/v1/sub-categories", subCategoryRouter);
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "form.html"));
-});
 
 // handle unknown routes
 app.get("*", (req, res, next) => {
