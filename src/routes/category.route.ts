@@ -4,8 +4,8 @@ import {
   deleteCategories,
   getAllCategories,
 } from "../controllers/category.controller";
-import { authorizeRole } from "../middlewares/authorizeRole";
-import { authorizeUser } from "../middlewares/authorizeUser";
+import { authorizeRole } from "../middlewares/authorizeRole.middleware";
+import { authorizeUser } from "../middlewares/authorizeUser.middleware";
 
 const router = Router();
 

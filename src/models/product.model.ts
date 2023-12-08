@@ -1,17 +1,12 @@
 import mongoose, { Document, Schema, model, Model } from "mongoose";
 
-interface IColor {
-  name: string;
-  price: number;
-  images: [string];
-  dp: string;
-}
-
 interface IProduct {
   title: string;
   description: string;
   discount: number; // number in precentage
-  colors: [IColor];
+  images: [string];
+  dp: string;
+  color: string;
   category: Schema.Types.ObjectId;
   sub_category: Schema.Types.ObjectId;
   owner: Schema.Types.ObjectId;
@@ -30,15 +25,20 @@ const productSchema = new Schema<IProduct>(
     discount: {
       type: Number, // number in percentage
     },
-
-    colors: [
+    dp: {
+      required: true,
+      type: String,
+    },
+    images: [
       {
-        name: String,
-        price: Number,
-        images: [String],
-        dp: String,
+        type: String,
+        required: true,
       },
     ],
+    color: {
+      type: String,
+      required: true,
+    },
     category: {
       type: Schema.Types.ObjectId,
       ref: "Category",

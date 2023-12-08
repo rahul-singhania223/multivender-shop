@@ -2,9 +2,11 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import ApiError from "./utils/ApiError";
-import handleApiError from "./middlewares/handleApiError";
-import { authorizeUser } from "./middlewares/authorizeUser";
-import { authorizeRole } from "./middlewares/authorizeRole";
+import handleApiError from "./middlewares/handleApiError.middleware";
+import { authorizeUser } from "./middlewares/authorizeUser.middleware";
+import { authorizeRole } from "./middlewares/authorizeRole.middleware";
+import { upload } from "./middlewares/multer.middleware";
+import path from "path";
 
 const app = express();
 
@@ -29,6 +31,10 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/categories", categoryRouter);
 
 app.use("/api/v1/sub-categories", subCategoryRouter);
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "form.html"));
+});
 
 // handle unknown routes
 app.get("*", (req, res, next) => {
