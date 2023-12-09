@@ -1,14 +1,14 @@
 <form
   method="post"
-  action="http://localhost:5000/upload"
+  action="/api/v1/product/create"
   enctype="multipart/form-data"
 >
-  <input name="dp" type="file" placeholder="select image for product dp" />
-  <input
-    name="images"
-    type="file"
-    multiple
-    placeholder="select images for product"
-  />
+  
+  <input type="text" placeholder="product name" />
+  <input type="text" placeholder="product description" />
+  <input type="text" placeholder="color" />
+  <input type="number" placeholder="discount" />
+  <input type=""
+
   <button type="submit">submit</button>
 </form>

@@ -15,11 +15,27 @@ const uploadOnCloudinary = async (localFilePath: string) => {
 
     fs.unlinkSync(localFilePath);
 
-    console.log(uploadInstance);
+    return {
+      public_id: uploadInstance.public_id as string,
+      url: uploadInstance.secure_url as string,
+    };
   } catch (err) {
-    console.log(err);
     fs.unlinkSync(localFilePath);
   }
 };
 
-export { uploadOnCloudinary };
+const deleteImageFromCloudinary = async (
+  public_id: string
+): Promise<string> => {
+  try {
+    const response = await cloudinary.uploader.destroy(public_id, {
+      resource_type: "image",
+    });
+
+    return response.result;
+  } catch (err) {
+    return "failed";
+  }
+};
+
+export { uploadOnCloudinary, deleteImageFromCloudinary };

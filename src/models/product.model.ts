@@ -1,16 +1,32 @@
-import mongoose, { Document, Schema, model, Model } from "mongoose";
+import mongoose, { Document, Schema, model, Model, Types } from "mongoose";
 
-interface IProduct {
+export interface IImage {
+  public_id: string;
+  url: string;
+}
+
+export interface IProduct {
   title: string;
   description: string;
   discount: number; // number in precentage
-  images: [string];
-  dp: string;
+  images: IImage[];
+  dp: IImage;
   color: string;
-  category: Schema.Types.ObjectId;
-  sub_category: Schema.Types.ObjectId;
+  category: Types.ObjectId;
+  sub_category: Types.ObjectId;
   owner: Schema.Types.ObjectId;
 }
+
+const imageSchema = new Schema<IImage>({
+  public_id: {
+    type: String,
+    required: true,
+  },
+  url: {
+    type: String,
+    required: true,
+  },
+});
 
 const productSchema = new Schema<IProduct>(
   {
@@ -24,17 +40,10 @@ const productSchema = new Schema<IProduct>(
     },
     discount: {
       type: Number, // number in percentage
+      default: 0,
     },
-    dp: {
-      required: true,
-      type: String,
-    },
-    images: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+    dp: imageSchema,
+    images: [imageSchema],
     color: {
       type: String,
       required: true,

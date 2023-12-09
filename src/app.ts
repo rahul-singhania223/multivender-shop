@@ -26,14 +26,15 @@ app.use(
 import userRouter from "./routes/user.route";
 import categoryRouter from "./routes/category.route";
 import subCategoryRouter from "./routes/subCategory.route";
-import multer from "multer";
-import { uploadOnCloudinary } from "./utils/cloudinary";
+import productRouter from "./routes/product.route";
 
 app.use("/api/v1/user", userRouter);
 
 app.use("/api/v1/categories", categoryRouter);
 
 app.use("/api/v1/sub-categories", subCategoryRouter);
+
+app.use("/api/v1/product", productRouter);
 
 // handle unknown routes
 app.get("*", (req, res, next) => {
