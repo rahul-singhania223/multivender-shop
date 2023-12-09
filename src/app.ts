@@ -27,6 +27,8 @@ import userRouter from "./routes/user.route";
 import categoryRouter from "./routes/category.route";
 import subCategoryRouter from "./routes/subCategory.route";
 import productRouter from "./routes/product.route";
+import orderRouter from "./routes/order.route";
+import addressRouter from "./routes/address.route";
 
 app.use("/api/v1/user", userRouter);
 
@@ -35,6 +37,10 @@ app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/sub-categories", subCategoryRouter);
 
 app.use("/api/v1/product", productRouter);
+
+app.use("/api/v1/order", orderRouter);
+
+app.use("/api/v1/address", addressRouter);
 
 // handle unknown routes
 app.get("*", (req, res, next) => {

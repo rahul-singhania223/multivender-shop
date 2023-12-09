@@ -3,7 +3,7 @@ import ApiError from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 
 // AUTHORIZE ROLE
-const authorizeRole = (role: "ADMIN" | "CUSTOMER" | "VENDOR") =>
+const authorizeRole = (...roles: string[]) =>
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
 
@@ -11,13 +11,13 @@ const authorizeRole = (role: "ADMIN" | "CUSTOMER" | "VENDOR") =>
       return next(new ApiError("Unauthorized user", 401));
     }
 
-    const isAdmin = user.type === role;
-
-    if (!isAdmin) {
+    if (!roles.includes(user.type)) {
       return next(
-        new ApiError("You are not allowed to perform this action", 403)
+        new ApiError("You are not allowed to perform this actioin", 500)
       );
     }
+
+    req.user = user;
 
     next();
   });

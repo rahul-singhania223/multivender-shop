@@ -41,6 +41,7 @@ const userSchema = new Schema<IUser>(
     type: {
       type: String,
       required: true,
+      default: "CUSTOMER",
     },
   },
   { timestamps: true }

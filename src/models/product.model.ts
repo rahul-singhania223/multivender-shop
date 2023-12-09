@@ -9,6 +9,7 @@ export interface IProduct {
   title: string;
   description: string;
   discount: number; // number in precentage
+  price: number;
   images: IImage[];
   dp: IImage;
   color: string;
@@ -37,6 +38,11 @@ const productSchema = new Schema<IProduct>(
     description: {
       type: String,
       required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+      default: 0,
     },
     discount: {
       type: Number, // number in percentage

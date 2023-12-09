@@ -1,10 +1,11 @@
-import { Document, model, Model, Schema } from "mongoose";
+import { Document, model, Model, Schema, Types } from "mongoose";
 
-interface IOrder extends Document {
-  product_id: Schema.Types.ObjectId;
-  orderedBy: Schema.Types.ObjectId;
-  ownedBy: Schema.Types.ObjectId;
-  status:
+export interface IOrder extends Document {
+  product_id: Types.ObjectId;
+  orderedBy: Types.ObjectId;
+  ownedBy: Types.ObjectId;
+  address_id: Types.ObjectId;
+  status?:
     | "PENDING"
     | "PACKED"
     | "OUT FOR DELIVERY"
@@ -12,7 +13,7 @@ interface IOrder extends Document {
     | "RETURNED"
     | "DELIVERED";
   payment_mode: "UPI" | "CARD" | "COD";
-  isPaid: boolean;
+  isPaid?: boolean;
   quantity: number;
   final_price: number;
   discount: number; // number in percentage
@@ -35,17 +36,26 @@ const orderSchema = new Schema<IOrder>(
       ref: "User",
       required: true,
     },
+    address_id: {
+      type: Schema.Types.ObjectId,
+      ref: "Address",
+      required: true,
+    },
     status: {
       type: String,
       required: true,
-      enum: [
-        "PENDING",
-        "PACKED",
-        "OUT FOR DELIVERY",
-        "DELIVERED",
-        "CANCELLED",
-        "RETURNED",
-      ],
+      enum: {
+        values: [
+          "PENDING",
+          "PACKED",
+          "OUT FOR DELIVERY",
+          "DELIVERED",
+          "CANCELLED",
+          "RETURNED",
+        ],
+        message: `{VALUE} is not supported`,
+      },
+      default: "PENDING",
     },
     payment_mode: {
       type: String,
@@ -55,6 +65,7 @@ const orderSchema = new Schema<IOrder>(
     isPaid: {
       type: Boolean,
       required: true,
+      default: false,
     },
     quantity: {
       type: Number,
