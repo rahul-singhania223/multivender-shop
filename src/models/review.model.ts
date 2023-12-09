@@ -1,10 +1,10 @@
-import { Schema, Document, Model, model } from "mongoose";
+import { Schema, Document, Model, model, Types } from "mongoose";
 
-interface IReview extends Document {
+export interface IReview extends Document {
   title: string;
   comment: string;
-  product_id: Schema.Types.ObjectId;
-  createdBy: Schema.Types.ObjectId;
+  product_id: Types.ObjectId;
+  createdBy: Types.ObjectId;
 }
 
 const reviewSchema = new Schema<IReview>(

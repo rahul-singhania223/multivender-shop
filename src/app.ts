@@ -29,6 +29,7 @@ import subCategoryRouter from "./routes/subCategory.route";
 import productRouter from "./routes/product.route";
 import orderRouter from "./routes/order.route";
 import addressRouter from "./routes/address.route";
+import reviewRouter from "./routes/review.route";
 
 app.use("/api/v1/user", userRouter);
 
@@ -41,6 +42,8 @@ app.use("/api/v1/product", productRouter);
 app.use("/api/v1/order", orderRouter);
 
 app.use("/api/v1/address", addressRouter);
+
+app.use("/api/v1/review", reviewRouter);
 
 // handle unknown routes
 app.get("*", (req, res, next) => {
