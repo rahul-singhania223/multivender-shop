@@ -1,9 +1,9 @@
-import { Document, Schema, model, Model } from "mongoose";
+import { Document, Schema, model, Model, Types } from "mongoose";
 
-interface IReply extends Document {
+export interface IReply extends Document {
   comment: string;
-  createdBy: Schema.Types.ObjectId;
-  review_id: Schema.Types.ObjectId;
+  createdBy: Types.ObjectId;
+  review_id: Types.ObjectId;
 }
 
 const replySchema = new Schema<IReply>(
