@@ -1,14 +1,15 @@
-import { Schema, Model, model, Document } from "mongoose";
+import mongoose, { Schema, Model, model, Document } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+import { IImage, imageSchema } from "./product.model";
 
 export interface IUser extends Document {
   fullName: string;
   email: string;
   password?: string;
   phone: string;
-  avatar: string;
+  avatar: IImage;
   type: "ADMIN" | "CUSTOMER" | "VENDOR";
   generateAccessToken: () => string;
   generateRefreshToken: () => string;
@@ -35,9 +36,7 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: [true, "phone is required"],
     },
-    avatar: {
-      type: String,
-    },
+    avatar: imageSchema,
     type: {
       type: String,
       required: true,
@@ -56,6 +55,15 @@ userSchema.pre("save", async function (next) {
 
   if (this.password) {
     this.password = await bcrypt.hash(this.password, 8);
+  }
+});
+
+userSchema.pre("updateOne", async function (next) {
+  const update: { password: string } = this.getUpdate() as { password: string };
+
+  if (update && update.password) {
+    update.password = await bcrypt.hash(update.password, 8);
+    next();
   }
 });
 

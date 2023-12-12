@@ -11,10 +11,20 @@ import { authorizeUser } from "../middlewares/authorizeUser.middleware";
 const router = Router();
 
 // CREATE AN ORDER
-router.post("/create", authorizeUser, authorizeRole("CUSTOMER"), createOrder);
+router.post(
+  "/create/:id",
+  authorizeUser,
+  authorizeRole("CUSTOMER"),
+  createOrder
+);
 
 // UPDATE AN ORDER
-router.put("/update/:id", authorizeUser, authorizeRole("VENDOR"), updateOrder);
+router.put(
+  "/update/:id",
+  authorizeUser,
+  authorizeRole("VENDOR", "CUSTOMER"),
+  updateOrder
+);
 
 // GET ONE ORDER
 router.get(

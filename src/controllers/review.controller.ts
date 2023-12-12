@@ -10,7 +10,8 @@ import { asyncHandler } from "../utils/asyncHandler";
 // CREATE A REVIEW
 const createReview = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { title, comment, product_id } = req.body;
+    const { title, comment } = req.body;
+    const product_id = req.params.id;
     const user = req.user;
 
     if (!title || !comment) {

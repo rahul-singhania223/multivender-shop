@@ -4,57 +4,62 @@ import { asyncHandler } from "../utils/asyncHandler";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { redis } from "../utils/redis";
 import { IUser, User } from "../models/user.model";
+import { setCookie } from "../utils/setCookie";
 
 // AUTHORIZE USER
 const authorizeUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { access_token, refresh_token } = req.cookies;
 
-    if (!refresh_token) {
-      return next(new ApiError("Session expired", 401));
-    }
+    async function setUser(token: string, secret: string) {
+      const { _id } = jwt.verify(token, secret) as JwtPayload;
 
-    let newAccessToken = access_token;
+      const cachedUser = JSON.parse((await redis.get(_id)) as string);
 
-    if (!access_token) {
-      const data = jwt.verify(
-        refresh_token,
-        process.env.REFRESH_TOKEN_SECRET as string
-      ) as JwtPayload;
+      if (cachedUser) {
+        req.user = cachedUser;
+        return next();
+      }
 
-      newAccessToken = jwt.sign(
-        {
-          _id: data._id,
-          fullName: data.fullName,
-          avatar: data.avatar,
-          email: data.email,
-        },
-        process.env.ACCESS_TOKEN_SECRET as string,
-        { expiresIn: "15m" }
-      );
-    }
+      const databaseUser = await User.findById(_id);
 
-    const { _id } = jwt.verify(
-      newAccessToken,
-      process.env.ACCESS_TOKEN_SECRET as string
-    ) as JwtPayload;
+      if (!databaseUser) {
+        return next(new ApiError("Couldn't get user", 500));
+      }
 
-    const cacheUser = JSON.parse((await redis.get(_id)) as string);
-
-    if (cacheUser) {
-      req.user = cacheUser;
+      req.user = databaseUser;
       return next();
     }
 
-    const databaseUser = (await User.findById(_id)) as IUser;
-
-    if (!databaseUser) {
-      return next(new ApiError("User not found", 404));
+    if (access_token) {
+      await setUser(access_token, process.env.ACCESS_TOKEN_SECRET as string);
+      return;
     }
 
-    req.user = databaseUser;
+    if (!refresh_token) {
+      return next(new ApiError("Session expired", 400));
+    }
 
-    next();
+    const { _id, fullName, email, avatar } = jwt.verify(
+      refresh_token,
+      process.env.REFRESH_TOKEN_SECRET as string
+    ) as JwtPayload;
+
+    const newAccessToken = jwt.sign(
+      { _id, fullName, email, avatar },
+      process.env.ACCESS_TOKEN_SECRET as string,
+      { expiresIn: "15m" }
+    );
+    const newRefreshToken = jwt.sign(
+      { _id, fullName, email, avatar },
+      process.env.REFRESH_TOKEN_SECRET as string,
+      { expiresIn: "10d" }
+    );
+
+    setCookie("access_token", newAccessToken, 15, res);
+    setCookie("refresh_token", newRefreshToken, 10 * 60 * 24, res);
+
+    setUser(newAccessToken, process.env.ACCESS_TOKEN_SECRET as string);
   }
 );
 

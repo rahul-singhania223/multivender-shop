@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import { Address, IAddress } from "../models/address.model";
+import { Order } from "../models/order.model";
 import router from "../routes/user.route";
 import ApiError from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
@@ -29,6 +30,7 @@ const addAddress = asyncHandler(
       city,
       state,
       line1,
+      line2: line2 ? line2 : "",
     } as IAddress;
 
     const address = await Address.create(addressDocument);
@@ -69,6 +71,20 @@ const deleteAddress = asyncHandler(
 
     if (!isValidCustomer) {
       return next(new ApiError("You can't delete this address", 400));
+    }
+
+    const pendingOrders = await Order.find({
+      address_id: address._id,
+      status: "PENDING",
+    });
+
+    if (pendingOrders.length > 0) {
+      return next(
+        new ApiError(
+          `Couldn't delete the address, ${pendingOrders.length} orders are pending.`,
+          400
+        )
+      );
     }
 
     const deleteInstance = await Address.deleteOne({ _id: addressId });

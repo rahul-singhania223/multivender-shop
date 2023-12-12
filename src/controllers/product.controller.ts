@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose, { Types } from "mongoose";
+import { Order } from "../models/order.model";
 import { IImage, IProduct, Product } from "../models/product.model";
+import { Reply } from "../models/reply.model";
+import { Review } from "../models/review.model";
 import ApiError from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -9,7 +12,7 @@ import {
   uploadOnCloudinary,
 } from "../utils/cloudinary";
 
-interface IUploaded {
+export interface IUploaded {
   [fieldName: string]: Express.Multer.File[];
 }
 
@@ -23,10 +26,15 @@ const createProduct = asyncHandler(
       color,
       category,
       sub_category,
-      owner,
+      price,
     } = req.body as IProduct;
 
     const files: IUploaded = req.files as IUploaded;
+    const user = req.user;
+
+    if (!user) {
+      return next(new ApiError("Unauthorized error", 401));
+    }
 
     if (!title || title.length < 5) {
       return next(new ApiError("Title must be atleast 5 characters long", 400));
@@ -47,11 +55,7 @@ const createProduct = asyncHandler(
     }
 
     if (!mongoose.Types.ObjectId.isValid(sub_category as unknown as string)) {
-      return next(new ApiError("Please select a product category", 400));
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(owner as unknown as string)) {
-      return next(new ApiError("Invalid owner id", 400));
+      return next(new ApiError("Please select a product sub category", 400));
     }
 
     if (!files["dp"]) {
@@ -59,9 +63,7 @@ const createProduct = asyncHandler(
     }
 
     if (!files["images"]) {
-      return next(
-        new ApiError("Please add atleast 2 images for product galary", 400)
-      );
+      return next(new ApiError("Please add images for product galary", 400));
     }
 
     const productDocument: IProduct = {
@@ -71,9 +73,10 @@ const createProduct = asyncHandler(
       color,
       category,
       sub_category,
-      owner,
+      owner: user._id,
       dp: { public_id: "", url: "" },
       images: [],
+      price,
     };
 
     const dpFilePath = files["dp"].map(
@@ -131,6 +134,20 @@ const deleteProduct = asyncHandler(
       return next(new ApiError("Only owner can delete the product", 400));
     }
 
+    const pendingOrders = (await Order.find({
+      product_id: productToDelete._id,
+      status: "PENDING",
+    })) as IProduct[];
+
+    if (pendingOrders.length > 0) {
+      return next(
+        new ApiError(
+          `Couldn't delete the product, ${pendingOrders.length} orders are pending.`,
+          400
+        )
+      );
+    }
+
     const deleteDp = await deleteImageFromCloudinary(
       productToDelete.dp.public_id
     );
@@ -148,6 +165,19 @@ const deleteProduct = asyncHandler(
     if (deleteDp !== "ok" || deleteImages !== "ok") {
       return next(new ApiError("Couldn't delete product images", 500));
     }
+
+    const deleteReviewsAndReplies = async () => {
+      try {
+        await Review.deleteMany({ product_id: productId });
+        await Reply.deleteMany({ product_id: productId });
+      } catch (err) {
+        return next(
+          new ApiError("Couldn't delete product reviews and replies", 500)
+        );
+      }
+    };
+
+    await deleteReviewsAndReplies();
 
     const deleteInstance = await Product.deleteOne({ _id: productId });
 

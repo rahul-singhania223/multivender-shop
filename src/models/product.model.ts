@@ -18,7 +18,7 @@ export interface IProduct {
   owner: Schema.Types.ObjectId;
 }
 
-const imageSchema = new Schema<IImage>({
+export const imageSchema = new Schema<IImage>({
   public_id: {
     type: String,
     required: true,

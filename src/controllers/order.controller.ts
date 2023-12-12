@@ -9,7 +9,9 @@ import { asyncHandler } from "../utils/asyncHandler";
 // CREATE ORDER
 const createOrder = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { product_id, quantity, payment_mode, address_id } = req.body;
+    const { quantity, payment_mode, address_id } = req.body;
+
+    const product_id = req.params.id;
 
     if (
       !mongoose.Types.ObjectId.isValid(product_id) ||
@@ -39,14 +41,14 @@ const createOrder = asyncHandler(
     }
 
     const orderDocument: IOrder = {
-      product_id,
+      product_id: new mongoose.Types.ObjectId(product_id),
       orderedBy: user._id,
-      ownedBy: product._id,
+      ownedBy: new mongoose.Types.ObjectId(product.owner as unknown as string),
+      address_id,
       payment_mode,
       quantity,
       final_price: product.price,
       discount: product.discount,
-      address_id,
     } as IOrder;
 
     const newOrder = await Order.create(orderDocument);
@@ -67,8 +69,7 @@ const createOrder = asyncHandler(
 const updateOrder = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const orderId = req.params.id;
-
-    const changes = req.body;
+    const { isPaid, status } = req.body;
 
     const order = await Order.findById(orderId);
 
@@ -76,7 +77,7 @@ const updateOrder = asyncHandler(
       return next(new ApiError("Order not found to update", 500));
     }
 
-    if (!changes) {
+    if (!isPaid && !status) {
       return res
         .status(200)
         .json(new ApiResponse(false, 200, "Nothing to update", order));
@@ -84,10 +85,12 @@ const updateOrder = asyncHandler(
 
     const fieldsToUpdate: any = {};
 
-    for (let field in changes) {
-      if (changes[field] && changes[field] !== "") {
-        fieldsToUpdate[field] = changes[field];
-      }
+    if (isPaid) {
+      fieldsToUpdate.isPaid = isPaid;
+    }
+
+    if (status && status !== order.status) {
+      fieldsToUpdate.status = status;
     }
 
     if (Object.keys(fieldsToUpdate).length === 0) {

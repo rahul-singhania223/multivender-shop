@@ -10,15 +10,19 @@ import { asyncHandler } from "../utils/asyncHandler";
 const createReply = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { comment } = req.body;
-    const reviewId = req.params.id;
+    const reviewId = req.query.r as string;
+    const productId = req.query.p as string;
     const user = req.user;
 
     if (!comment) {
       return next(new ApiError("comment is required", 400));
     }
 
-    if (!mongoose.Types.ObjectId.isValid(reviewId)) {
-      return next(new ApiError("Invalid review id", 400));
+    if (
+      !mongoose.Types.ObjectId.isValid(reviewId) ||
+      !mongoose.Types.ObjectId.isValid(productId)
+    ) {
+      return next(new ApiError("Invalid product id or review id", 400));
     }
 
     if (!user) {
@@ -29,6 +33,7 @@ const createReply = asyncHandler(
       comment,
       review_id: new mongoose.Types.ObjectId(reviewId),
       createdBy: user._id,
+      product_id: new mongoose.Types.ObjectId(productId),
     } as IReply;
 
     const reply = await Reply.create(replyDocument);

@@ -4,14 +4,19 @@ import {
   createReview,
   deleteReview,
   getReviews,
-} from "../controllers/review.conroller";
+} from "../controllers/review.controller";
 import { authorizeRole } from "../middlewares/authorizeRole.middleware";
 import { authorizeUser } from "../middlewares/authorizeUser.middleware";
 
 const router = Router();
 
 // CREATE REVIEW (only for customer)
-router.post("/create", authorizeUser, authorizeRole("CUSTOMER"), createReview);
+router.post(
+  "/create/:id",
+  authorizeUser,
+  authorizeRole("CUSTOMER"),
+  createReview
+);
 
 // DELETE REVIEW (only for customer)
 router.delete(
